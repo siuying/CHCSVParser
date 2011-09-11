@@ -24,21 +24,13 @@
  **/
 
 #import "CHCSV.h"
+#import "CHCSVTypes.h"
+
 #define STRING_QUOTE @"\""
 #define STRING_BACKSLASH @"\\"
 
 #define UNICHAR_QUOTE '"'
 #define UNICHAR_BACKSLASH '\\'
-
-NSString *const CHCSVErrorDomain = @"com.davedelong.csv";
-
-enum {
-	CHCSVParserStateInsideFile = 0,
-	CHCSVParserStateInsideLine = 1,
-	CHCSVParserStateInsideField = 2,
-	CHCSVParserStateInsideComment = 3,
-    CHCSVParserStateCancelled = 4
-};
 
 @interface NSMutableString (CHCSVAdditions)
 

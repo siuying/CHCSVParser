@@ -12,6 +12,8 @@
 		551981D61203715400FBE033 /* CHCSVParser.m in Sources */ = {isa = PBXBuildFile; fileRef = 551981D51203715400FBE033 /* CHCSVParser.m */; };
 		551BB9DA141D20E600A1D679 /* CHCSVParser_Fast.m in Sources */ = {isa = PBXBuildFile; fileRef = 551BB9D9141D20E600A1D679 /* CHCSVParser_Fast.m */; };
 		551BB9DB141D20E600A1D679 /* CHCSVParser_Fast.m in Sources */ = {isa = PBXBuildFile; fileRef = 551BB9D9141D20E600A1D679 /* CHCSVParser_Fast.m */; };
+		551BB9DE141D2A8F00A1D679 /* CHCSVTypes.m in Sources */ = {isa = PBXBuildFile; fileRef = 551BB9DD141D2A8F00A1D679 /* CHCSVTypes.m */; };
+		551BB9DF141D2A8F00A1D679 /* CHCSVTypes.m in Sources */ = {isa = PBXBuildFile; fileRef = 551BB9DD141D2A8F00A1D679 /* CHCSVTypes.m */; };
 		5538B52D1344F0A1004930DD /* test.tsv in Resources */ = {isa = PBXBuildFile; fileRef = 5538B52C1344F0A1004930DD /* test.tsv */; };
 		557FCEB61203F938009FCDBA /* CoreServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 557FCEB51203F938009FCDBA /* CoreServices.framework */; };
 		557FD0431204A45D009FCDBA /* NSArray+CHCSVAdditions.m in Sources */ = {isa = PBXBuildFile; fileRef = 557FD0421204A45D009FCDBA /* NSArray+CHCSVAdditions.m */; };
@@ -51,6 +53,8 @@
 		551981EE1203800300FBE033 /* Test.csv */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = Test.csv; sourceTree = "<group>"; };
 		551BB9D8141D20E600A1D679 /* CHCSVParser_Fast.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = CHCSVParser_Fast.h; path = CHCSVParser/CHCSVParser_Fast.h; sourceTree = "<group>"; };
 		551BB9D9141D20E600A1D679 /* CHCSVParser_Fast.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = CHCSVParser_Fast.m; path = CHCSVParser/CHCSVParser_Fast.m; sourceTree = "<group>"; };
+		551BB9DC141D2A8F00A1D679 /* CHCSVTypes.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = CHCSVTypes.h; path = CHCSVParser/CHCSVTypes.h; sourceTree = "<group>"; };
+		551BB9DD141D2A8F00A1D679 /* CHCSVTypes.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = CHCSVTypes.m; path = CHCSVParser/CHCSVTypes.m; sourceTree = "<group>"; };
 		5538B52C1344F0A1004930DD /* test.tsv */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = test.tsv; sourceTree = "<group>"; };
 		557FCEB51203F938009FCDBA /* CoreServices.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreServices.framework; path = System/Library/Frameworks/CoreServices.framework; sourceTree = SDKROOT; };
 		557FD0411204A45D009FCDBA /* NSArray+CHCSVAdditions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSArray+CHCSVAdditions.h"; sourceTree = "<group>"; };
@@ -133,6 +137,8 @@
 			isa = PBXGroup;
 			children = (
 				5516BCB612578D480025F235 /* CHCSV.h */,
+				551BB9DC141D2A8F00A1D679 /* CHCSVTypes.h */,
+				551BB9DD141D2A8F00A1D679 /* CHCSVTypes.m */,
 				551981D41203715400FBE033 /* CHCSVParser.h */,
 				551981D51203715400FBE033 /* CHCSVParser.m */,
 				551BB9D8141D20E600A1D679 /* CHCSVParser_Fast.h */,
@@ -261,6 +267,7 @@
 				55EFC7B91210608C0070B303 /* CHCSVWriter.m in Sources */,
 				5516BCB512578CFC0025F235 /* NSString+CHCSVAdditions.m in Sources */,
 				551BB9DB141D20E600A1D679 /* CHCSVParser_Fast.m in Sources */,
+				551BB9DF141D2A8F00A1D679 /* CHCSVTypes.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -274,6 +281,7 @@
 				5516BCBB12578EA90025F235 /* NSString+CHCSVAdditions.m in Sources */,
 				55BB40E612A367A500A1BB33 /* CHCSVWriter.m in Sources */,
 				551BB9DA141D20E600A1D679 /* CHCSVParser_Fast.m in Sources */,
+				551BB9DE141D2A8F00A1D679 /* CHCSVTypes.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

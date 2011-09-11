@@ -16,9 +16,15 @@
     
     NSMutableString *string;
     NSUInteger stringIndex;
+    
+    NSUInteger currentLine;
+    NSError *error;
+    unichar delimiter;
 }
 
 - (id)initWithCSVFile:(NSString *)file;
+- (id)initWithCSVString:(NSString *)csv;
+
 - (void)parse;
 
 @end
