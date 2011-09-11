@@ -1,5 +1,6 @@
 #import <Foundation/Foundation.h>
 #import "CHCSV.h"
+#import "CHCSVParser_Fast.h"
 
 @interface Delegate : NSObject <CHCSVParserDelegate>
 @end
@@ -30,6 +31,9 @@
 int main (int argc, const char * argv[]) {
     NSAutoreleasePool * pool = [[NSAutoreleasePool alloc] init];
 	NSString * file = @"/Users/dave/Developer/Open Source/Git Projects/CHCSVParser/Test.csv";
+    CHCSVParser_Fast *fast = [[CHCSVParser_Fast alloc] initWithCSVFile:file];
+    [fast parse];
+    [fast release];
     
 	/**
 	CHCSVWriter *big = [[CHCSVWriter alloc] initWithCSVFile:file atomic:NO];
