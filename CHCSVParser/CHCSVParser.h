@@ -24,8 +24,7 @@
  **/
 
 #import <Foundation/Foundation.h>
-
-@protocol CHCSVParserDelegate;
+#import "CHCSVParserDelegate.h"
 
 @interface CHCSVParser : NSObject {
 
@@ -71,20 +70,5 @@
 
 - (void) parse;
 - (void) cancelParsing;
-
-@end
-
-@protocol CHCSVParserDelegate <NSObject>
-
-- (void) parser:(CHCSVParser *)parser didStartDocument:(NSString *)csvFile;
-- (void) parser:(CHCSVParser *)parser didStartLine:(NSUInteger)lineNumber;
-
-- (void) parser:(CHCSVParser *)parser didEndLine:(NSUInteger)lineNumber;
-
-- (void) parser:(CHCSVParser *)parser didReadField:(NSString *)field;
-
-- (void) parser:(CHCSVParser *)parser didEndDocument:(NSString *)csvFile;
-
-- (void) parser:(CHCSVParser *)parser didFailWithError:(NSError *)error;
 
 @end

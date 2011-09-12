@@ -51,10 +51,11 @@
 		551981D41203715400FBE033 /* CHCSVParser.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CHCSVParser.h; sourceTree = "<group>"; };
 		551981D51203715400FBE033 /* CHCSVParser.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CHCSVParser.m; sourceTree = "<group>"; };
 		551981EE1203800300FBE033 /* Test.csv */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = Test.csv; sourceTree = "<group>"; };
-		551BB9D8141D20E600A1D679 /* CHCSVParser_Fast.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = CHCSVParser_Fast.h; path = CHCSVParser/CHCSVParser_Fast.h; sourceTree = "<group>"; };
-		551BB9D9141D20E600A1D679 /* CHCSVParser_Fast.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = CHCSVParser_Fast.m; path = CHCSVParser/CHCSVParser_Fast.m; sourceTree = "<group>"; };
-		551BB9DC141D2A8F00A1D679 /* CHCSVTypes.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = CHCSVTypes.h; path = CHCSVParser/CHCSVTypes.h; sourceTree = "<group>"; };
-		551BB9DD141D2A8F00A1D679 /* CHCSVTypes.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = CHCSVTypes.m; path = CHCSVParser/CHCSVTypes.m; sourceTree = "<group>"; };
+		551BB9D8141D20E600A1D679 /* CHCSVParser_Fast.h */ = {isa = PBXFileReference; fileEncoding = 4; path = CHCSVParser_Fast.h; sourceTree = "<group>"; };
+		551BB9D9141D20E600A1D679 /* CHCSVParser_Fast.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CHCSVParser_Fast.m; sourceTree = "<group>"; };
+		551BB9DC141D2A8F00A1D679 /* CHCSVTypes.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CHCSVTypes.h; sourceTree = "<group>"; };
+		551BB9DD141D2A8F00A1D679 /* CHCSVTypes.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CHCSVTypes.m; sourceTree = "<group>"; };
+		551BB9E0141D9A7200A1D679 /* CHCSVParserDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CHCSVParserDelegate.h; sourceTree = "<group>"; };
 		5538B52C1344F0A1004930DD /* test.tsv */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = test.tsv; sourceTree = "<group>"; };
 		557FCEB51203F938009FCDBA /* CoreServices.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreServices.framework; path = System/Library/Frameworks/CoreServices.framework; sourceTree = SDKROOT; };
 		557FD0411204A45D009FCDBA /* NSArray+CHCSVAdditions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSArray+CHCSVAdditions.h"; sourceTree = "<group>"; };
@@ -141,6 +142,7 @@
 				551BB9DD141D2A8F00A1D679 /* CHCSVTypes.m */,
 				551981D41203715400FBE033 /* CHCSVParser.h */,
 				551981D51203715400FBE033 /* CHCSVParser.m */,
+				551BB9E0141D9A7200A1D679 /* CHCSVParserDelegate.h */,
 				551BB9D8141D20E600A1D679 /* CHCSVParser_Fast.h */,
 				551BB9D9141D20E600A1D679 /* CHCSVParser_Fast.m */,
 				55EFC7B71210608C0070B303 /* CHCSVWriter.h */,
@@ -150,7 +152,7 @@
 				5516BCB312578CFC0025F235 /* NSString+CHCSVAdditions.h */,
 				5516BCB412578CFC0025F235 /* NSString+CHCSVAdditions.m */,
 			);
-			name = CHCSVParser;
+			path = CHCSVParser;
 			sourceTree = "<group>";
 		};
 		C6859EA2029092E104C91782 /* Documentation */ = {
