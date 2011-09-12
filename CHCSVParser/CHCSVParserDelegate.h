@@ -8,6 +8,8 @@
 
 #import <Foundation/Foundation.h>
 
+@class CHCSVParser;
+
 @protocol CHCSVParserDelegate <NSObject>
 
 - (void)parser:(CHCSVParser *)parser didStartDocument:(NSString *)csvFile;

@@ -23,6 +23,7 @@
  THE SOFTWARE.
  **/
 
+#import "CHCSVParserDelegate.h"
 #import "CHCSVParser.h"
 #import "CHCSVWriter.h"
 #import "NSArray+CHCSVAdditions.h"

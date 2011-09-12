@@ -7,6 +7,7 @@
 //
 
 #import <Foundation/Foundation.h>
+#import "CHCSVParserDelegate.h"
 
 @interface CHCSVParser_Fast : NSObject {
     NSInputStream *source;
@@ -21,6 +22,8 @@
     NSError *error;
     unichar delimiter;
 }
+
+@property (nonatomic, assign) id<CHCSVParserDelegate> delegate;
 
 - (id)initWithCSVFile:(NSString *)file;
 - (id)initWithCSVString:(NSString *)csv;

@@ -51,7 +51,7 @@
 		551981D41203715400FBE033 /* CHCSVParser.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CHCSVParser.h; sourceTree = "<group>"; };
 		551981D51203715400FBE033 /* CHCSVParser.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CHCSVParser.m; sourceTree = "<group>"; };
 		551981EE1203800300FBE033 /* Test.csv */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = Test.csv; sourceTree = "<group>"; };
-		551BB9D8141D20E600A1D679 /* CHCSVParser_Fast.h */ = {isa = PBXFileReference; fileEncoding = 4; path = CHCSVParser_Fast.h; sourceTree = "<group>"; };
+		551BB9D8141D20E600A1D679 /* CHCSVParser_Fast.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CHCSVParser_Fast.h; sourceTree = "<group>"; };
 		551BB9D9141D20E600A1D679 /* CHCSVParser_Fast.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CHCSVParser_Fast.m; sourceTree = "<group>"; };
 		551BB9DC141D2A8F00A1D679 /* CHCSVTypes.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CHCSVTypes.h; sourceTree = "<group>"; };
 		551BB9DD141D2A8F00A1D679 /* CHCSVTypes.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CHCSVTypes.m; sourceTree = "<group>"; };

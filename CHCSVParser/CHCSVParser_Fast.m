@@ -41,6 +41,7 @@
 @implementation CHCSVParser_Fast
 
 @synthesize state=_state;
+@synthesize delegate=_delegate;
 
 - (id)initWithCSVFile:(NSString *)file {
     self = [super init];
@@ -234,27 +235,59 @@
 // make sure these each check for the cancelled state
 
 - (void)_beginDocument {
-    printf("<document>\n");
+    [[self delegate] parser:(id)self didStartDocument:nil];
 }
 
 - (void)_endDocument {
-    printf("</document>\n");
+    if (error != nil) {
+        [[self delegate] parser:(id)self didFailWithError:error];
+    } else {
+        [[self delegate] parser:(id)self didEndDocument:nil];
+    }
 }
 
 - (void)_beginLine {
-    printf("\t<line %lu>\n", currentLine);
+    [[self delegate] parser:(id)self didStartLine:currentLine];
 }
 
 - (void)_endLine {
-    printf("\t</line>\n");
+    [[self delegate] parser:(id)self didEndLine:currentLine];
 }
 
 - (void)_readField:(NSString *)rawField {
-    printf("\t\t<field>%s</field>\n", [rawField UTF8String]);
+    NSUInteger length = [rawField length];
+    NSMutableString *field = [[NSMutableString alloc] initWithCapacity:length];
+
+    for (NSUInteger i = 0; i < length; ++i) {
+        unichar current = [rawField characterAtIndex:i];
+        BOOL shouldAppend = YES;
+        
+        if (current == '"') {
+            if (i == 0 || i+1 == length) {
+                shouldAppend = NO;
+                // this is the first/last character; skip it
+            } else if (i+1 < length && [rawField characterAtIndex:i+1] == current) {
+                // quote escaped by double-quoting
+                i++; // skip the next quote
+            }
+        } else if (current == '\\') {
+            if (i+1 < length) {
+                i++;
+                current = [rawField characterAtIndex:i];
+            }
+        }
+        
+        if (shouldAppend) {
+            [field appendFormat:@"%C", current];
+        }
+    }
+    
+    [[self delegate] parser:(id)self didReadField:field];
+    [field release];
 }
 
 - (void)_readComment:(NSString *)rawComment {
-    printf("\t\t<comment>%s</comment>\n", [rawComment UTF8String]);
+    [[self delegate] parser:(id)self didReadComment:rawComment];
 }
 
 @end

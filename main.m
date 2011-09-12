@@ -7,19 +7,22 @@
 @implementation Delegate
 
 - (void) parser:(CHCSVParser *)parser didStartDocument:(NSString *)csvFile {
-//	NSLog(@"parser started: %@", csvFile);
+    printf("<document>\n");
 }
 - (void) parser:(CHCSVParser *)parser didStartLine:(NSUInteger)lineNumber {
-//	NSLog(@"Starting line: %lu", lineNumber);
+    printf("\t<line num=\"%lu\">\n", lineNumber);
 }
 - (void) parser:(CHCSVParser *)parser didReadField:(NSString *)field {
-//	NSLog(@"   field: %@", field);
+    printf("\t\t<field>%s</field>\n", [field UTF8String]);
+}
+- (void)parser:(CHCSVParser *)parser didReadComment:(NSString *)comment {
+    printf("\t\t<comment>%s</comment>\n", [comment UTF8String]);
 }
 - (void) parser:(CHCSVParser *)parser didEndLine:(NSUInteger)lineNumber {
-//	NSLog(@"Ending line: %lu", lineNumber);
+    printf("\t</line>\n");
 }
 - (void) parser:(CHCSVParser *)parser didEndDocument:(NSString *)csvFile {
-//	NSLog(@"parser ended: %@", csvFile);
+    printf("</document>\n");
 }
 - (void) parser:(CHCSVParser *)parser didFailWithError:(NSError *)error {
 	NSLog(@"ERROR: %@", error);
@@ -31,7 +34,10 @@
 int main (int argc, const char * argv[]) {
     NSAutoreleasePool * pool = [[NSAutoreleasePool alloc] init];
 	NSString * file = @"/Users/dave/Developer/Open Source/Git Projects/CHCSVParser/Test.csv";
+	Delegate * d = [[Delegate alloc] init];
+    
     CHCSVParser_Fast *fast = [[CHCSVParser_Fast alloc] initWithCSVFile:file];
+    [fast setDelegate:d];
     [fast parse];
     [fast release];
     
@@ -80,7 +86,6 @@ int main (int argc, const char * argv[]) {
 	
 	NSLog(@"encoding: %@", CFStringGetNameOfEncoding(CFStringConvertNSStringEncodingToEncoding(encoding)));
 	
-	Delegate * d = [[Delegate alloc] init];
 	[p setParserDelegate:d];
 	
 	NSTimeInterval start = [NSDate timeIntervalSinceReferenceDate];
