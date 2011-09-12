@@ -137,12 +137,6 @@
 
 #pragma mark - Parsing
 
-- (void)setState:(CHCSVParserState)state {
-    if (state != _state && _state != CHCSVParserStateCancelled) {
-        _state = state;
-    }
-}
-
 - (void)parse {
     [source open];
     [self _beginDocument];
@@ -165,36 +159,41 @@
 }
 
 - (void)_parseFields {
-    unichar peek = [self _peekNextCharacter];
+    unichar next = [self _peekNextCharacter];
     
-    while (!IS_NEWLINE_CHAR(peek)) {
-        if (peek == '#') {
+    while (!IS_NEWLINE_CHAR(next) && next != '\0') {
+        next = [self _peekNextCharacter];
+        if (next == '#') {
             [self _parseComment];
         } else {
             [self _parseField];
         }
-        peek = [self _peekNextCharacter];
-    }
-    
-    if (IS_NEWLINE_CHAR(peek)) {
-        //consume the newline
-        (void)[self _nextCharacter];
+        // this consumes the delimiter/newline
+        next = [self _nextCharacter];
     }
 }
 
 - (void)_parseField {
     NSUInteger startIndex = stringIndex;
-    unichar currentChar = [self _nextCharacter];
+    unichar currentChar = [self _peekNextCharacter];
     
     BOOL balancedQuotes = YES;
     BOOL balancedEscapes = YES;
     
     if (currentChar == '"') {
         balancedQuotes = NO;
-        currentChar = [self _nextCharacter]; // skip the quote
+        (void)[self _nextCharacter]; // skip the quote
+        currentChar = [self _peekNextCharacter];
     }
     
-    while (currentChar != '\0' && (balancedQuotes == NO || balancedEscapes == NO || currentChar != delimiter || !IS_NEWLINE_CHAR(currentChar))) {
+    while (currentChar != '\0') {
+        if (balancedQuotes == YES && balancedEscapes == YES) {
+            if (currentChar == delimiter) { break; }
+            if (IS_NEWLINE_CHAR(currentChar)) { break; }
+        }
+        
+        currentChar = [self _nextCharacter];
+        
         if (currentChar == '"') {
             if (!balancedEscapes) {
                 balancedEscapes = YES;
@@ -203,14 +202,13 @@
             }
         } else if (currentChar == '\\') {
             balancedEscapes = !balancedEscapes;
+        } else {
+            balancedEscapes = YES;
         }
-        currentChar = [self _nextCharacter];
+        currentChar = [self _peekNextCharacter];
     }
     
     NSUInteger endIndex = stringIndex;
-    if (currentChar == delimiter || IS_NEWLINE_CHAR(currentChar)) {
-        endIndex--;
-    }
     NSRange fieldRange = NSMakeRange(startIndex, endIndex - startIndex);
     NSString *field = [string substringWithRange:fieldRange];
     [self _readField:field];
