@@ -154,6 +154,11 @@
         [self _beginLine];
         [self _parseFields];
         [self _endLine];
+        
+        // toss out this line
+        [string replaceCharactersInRange:NSMakeRange(0, stringIndex) withString:@""];
+        stringIndex = 0;
+        
         currentLine++;
         peek = [self _peekNextCharacter];
     }
