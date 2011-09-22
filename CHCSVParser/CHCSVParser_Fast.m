@@ -41,7 +41,6 @@
 @implementation CHCSVParser_Fast
 
 @synthesize state=_state;
-@synthesize delegate=_delegate;
 
 - (id)initWithCSVFile:(NSString *)file {
     self = [super init];
@@ -50,7 +49,7 @@
         buffer = [[NSMutableData alloc] initWithCapacity:CHUNK_SIZE * 2];
         string = [[NSMutableString alloc] initWithCapacity:CHUNK_SIZE * 2];
         encoding = NSUTF8StringEncoding;
-        delimiter = ',';
+        delimiter_character = ',';
     }
     return self;
 }
@@ -63,7 +62,7 @@
         
         string = [csv mutableCopy];
         encoding = [string fastestEncoding];
-        delimiter = ',';
+        delimiter_character = ',';
     }
     return self;
 }
@@ -194,7 +193,7 @@
     
     while (currentChar != '\0') {
         if (balancedQuotes == YES && balancedEscapes == YES) {
-            if (currentChar == delimiter) { break; }
+            if (currentChar == delimiter_character) { break; }
             if (IS_NEWLINE_CHAR(currentChar)) { break; }
         }
         
@@ -240,23 +239,23 @@
 // make sure these each check for the cancelled state
 
 - (void)_beginDocument {
-    [[self delegate] parser:(id)self didStartDocument:nil];
+    [[self parserDelegate] parser:(id)self didStartDocument:nil];
 }
 
 - (void)_endDocument {
     if (error != nil) {
-        [[self delegate] parser:(id)self didFailWithError:error];
+        [[self parserDelegate] parser:(id)self didFailWithError:error];
     } else {
-        [[self delegate] parser:(id)self didEndDocument:nil];
+        [[self parserDelegate] parser:(id)self didEndDocument:nil];
     }
 }
 
 - (void)_beginLine {
-    [[self delegate] parser:(id)self didStartLine:currentLine];
+    [[self parserDelegate] parser:(id)self didStartLine:currentLine];
 }
 
 - (void)_endLine {
-    [[self delegate] parser:(id)self didEndLine:currentLine];
+    [[self parserDelegate] parser:(id)self didEndLine:currentLine];
 }
 
 - (void)_readField:(NSString *)rawField {
@@ -287,12 +286,12 @@
         }
     }
     
-    [[self delegate] parser:(id)self didReadField:field];
+    [[self parserDelegate] parser:(id)self didReadField:field];
     [field release];
 }
 
 - (void)_readComment:(NSString *)rawComment {
-    [[self delegate] parser:(id)self didReadComment:rawComment];
+    [[self parserDelegate] parser:(id)self didReadComment:rawComment];
 }
 
 @end

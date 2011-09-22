@@ -37,7 +37,7 @@ int main (int argc, const char * argv[]) {
 	Delegate * d = [[Delegate alloc] init];
     
     CHCSVParser_Fast *fast = [[CHCSVParser_Fast alloc] initWithCSVFile:file];
-    [fast setDelegate:d];
+    [fast setParserDelegate:d];
     [fast parse];
     [fast release];
     
