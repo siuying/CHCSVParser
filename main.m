@@ -7,25 +7,25 @@
 @implementation Delegate
 
 - (void) parser:(CHCSVParser *)parser didStartDocument:(NSString *)csvFile {
-    printf("<document>\n");
+//    printf("<document>\n");
 }
 - (void) parser:(CHCSVParser *)parser didStartLine:(NSUInteger)lineNumber {
-    printf("\t<line num=\"%lu\">\n", lineNumber);
+//    printf("\t<line num=\"%lu\">\n", lineNumber);
 }
 - (void) parser:(CHCSVParser *)parser didReadField:(NSString *)field {
-    printf("\t\t<field>%s</field>\n", [field UTF8String]);
+//    printf("\t\t<field>%s</field>\n", [field UTF8String]);
 }
 - (void)parser:(CHCSVParser *)parser didReadComment:(NSString *)comment {
-    printf("\t\t<comment>%s</comment>\n", [comment UTF8String]);
+//    printf("\t\t<comment>%s</comment>\n", [comment UTF8String]);
 }
 - (void) parser:(CHCSVParser *)parser didEndLine:(NSUInteger)lineNumber {
-    printf("\t</line>\n");
+//    printf("\t</line>\n");
 }
 - (void) parser:(CHCSVParser *)parser didEndDocument:(NSString *)csvFile {
-    printf("</document>\n");
+//    printf("</document>\n");
 }
 - (void) parser:(CHCSVParser *)parser didFailWithError:(NSError *)error {
-	NSLog(@"ERROR: %@", error);
+//	NSLog(@"ERROR: %@", error);
 }
 @end
 
@@ -36,10 +36,30 @@ int main (int argc, const char * argv[]) {
 	NSString * file = @"/Users/dave/Developer/Open Source/Git Projects/CHCSVParser/Test.csv";
 	Delegate * d = [[Delegate alloc] init];
     
-    CHCSVParser_Fast *fast = [[CHCSVParser_Fast alloc] initWithCSVFile:file];
+    CHCSVParser *fast = [[CHCSVParser alloc] initWithContentsOfCSVFile:file encoding:NSUTF8StringEncoding error:nil];
     [fast setParserDelegate:d];
+    
+    NSTimeInterval s = [NSDate timeIntervalSinceReferenceDate];
     [fast parse];
+    NSTimeInterval e = [NSDate timeIntervalSinceReferenceDate];
+    
     [fast release];
+    
+    NSLog(@"diff: %f", e-s);
+    
+    file = @"/Users/dave/Developer/Open Source/Git Projects/CHCSVParser/giant-UTF16LE.csv";
+    
+    NSStringEncoding encoding = 0;
+    CHCSVParser *p = [[CHCSVParser alloc] initWithContentsOfCSVFile:file usedEncoding:&encoding error:nil];
+    [p setParserDelegate:d];
+    
+    s = [NSDate timeIntervalSinceReferenceDate];
+    [p parse];
+    e = [NSDate timeIntervalSinceReferenceDate];
+    
+    [p release];
+    
+    NSLog(@"diff: %f", e-s);
     
 	/**
 	CHCSVWriter *big = [[CHCSVWriter alloc] initWithCSVFile:file atomic:NO];
@@ -79,10 +99,10 @@ int main (int argc, const char * argv[]) {
 	 **/
 	
 	NSLog(@"Beginning...");
-	NSStringEncoding encoding = 0;
+	encoding = 0;
     NSInputStream *stream = [NSInputStream inputStreamWithFileAtPath:file];
     NSError *error = nil;
-	CHCSVParser * p = [[CHCSVParser alloc] initWithStream:stream usedEncoding:&encoding error:&error];
+	p = [[CHCSVParser alloc] initWithStream:stream usedEncoding:&encoding error:&error];
 	
 	NSLog(@"encoding: %@", CFStringGetNameOfEncoding(CFStringConvertNSStringEncodingToEncoding(encoding)));
 	
@@ -99,8 +119,8 @@ int main (int argc, const char * argv[]) {
     
     NSArray *a = [NSArray arrayWithContentsOfCSVFile:file encoding:encoding error:nil];
     NSLog(@"%@", a);
-    NSString *s = [a CSVString];
-    NSLog(@"%@", s);
+    NSString *str = [a CSVString];
+    NSLog(@"%@", str);
     
 	[p release];
 	

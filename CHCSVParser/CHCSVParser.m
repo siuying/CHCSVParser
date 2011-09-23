@@ -116,10 +116,10 @@ NSStringEncoding CHCSVOpenStreamAndSniffEncoding(NSInputStream *stream, uint8_t 
     } else {
         uint8_t bytes[4];
         finalEncoding = CHCSVOpenStreamAndSniffEncoding(readStream, bytes);
-        [self release];
         
         initialData = [NSData dataWithBytes:bytes length:4];
     }
+    [self release];
     
     if (finalEncoding == NSUTF8StringEncoding || finalEncoding == NSMacOSRomanStringEncoding) {
         self = [[CHCSVParser_Fast alloc] _initWithStream:readStream encoding:finalEncoding initialData:initialData error:anError];

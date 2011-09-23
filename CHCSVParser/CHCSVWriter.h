@@ -39,6 +39,7 @@
 	NSString *delimiter;
 	
 	NSCharacterSet * illegalCharacters;
+    NSData *bom;
 	
 	NSError * error;
 }

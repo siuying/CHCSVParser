@@ -74,6 +74,7 @@
 
 - (void) dealloc {
 	[self closeFile];
+    [bom release];
 	[destinationFile release];
 	[delimiter release];
 	[handleFile release];
@@ -126,7 +127,25 @@
 	}
     
     if (outputHandle != nil) {
-        [outputHandle writeData:[string dataUsingEncoding:encoding]];
+        if (bom == nil) {
+            // discover the BOM for this encoding
+            NSData *a = [@"a" dataUsingEncoding:encoding];
+            NSData *aa = [@"aa" dataUsingEncoding:encoding];
+            if ([a length] * 2 != [aa length]) {
+                NSUInteger characterLength = [aa length] - [a length];
+                bom = [[a subdataWithRange:NSMakeRange(0, [a length]-characterLength)] retain];
+            } else {
+                bom = [[NSData alloc] init];
+            }
+            
+            [outputHandle writeData:bom];
+        }
+        
+        NSData *stringData = [string dataUsingEncoding:encoding];
+        if ([bom length] > 0) {
+            stringData = [stringData subdataWithRange:NSMakeRange([bom length], [stringData length] - [bom length])];
+        }
+        [outputHandle writeData:stringData];
     } else {
         if (stringValue == nil) {
             stringValue = [[NSMutableString alloc] init];
