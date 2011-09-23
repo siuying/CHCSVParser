@@ -13,7 +13,7 @@
     @protected
     BOOL hasStarted;
     NSInputStream *input;
-    NSString *csvFile;
+    id csvSource;
     NSString *delimiter;
     NSCharacterSet *newlineCharacterSet;
     NSError *error;
@@ -29,7 +29,6 @@
 
 @property (assign) __weak id<CHCSVParserDelegate> parserDelegate;
 @property (readonly) NSError *error;
-@property (nonatomic, readonly) NSString *csvFile;
 @property (nonatomic, copy) NSString *delimiter;
 @property (nonatomic, copy) NSCharacterSet *newlineCharacterSet;
 @property (nonatomic) NSUInteger chunkSize;

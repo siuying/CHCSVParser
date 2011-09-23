@@ -56,7 +56,7 @@ NSStringEncoding CHCSVOpenStreamAndSniffEncoding(NSInputStream *stream, uint8_t 
 
 @interface CHCSVParser ()
 
-@property (nonatomic, readonly) NSStringEncoding encoding;
+@property (nonatomic, retain) id csvSource;
 
 @end
 
@@ -64,17 +64,17 @@ NSStringEncoding CHCSVOpenStreamAndSniffEncoding(NSInputStream *stream, uint8_t 
 @synthesize hasStarted;
 @synthesize parserDelegate;
 @synthesize error;
-@synthesize csvFile;
 @synthesize delimiter;
 @synthesize chunkSize;
 @synthesize newlineCharacterSet;
-@synthesize encoding;
+@synthesize csvSource;
 @synthesize canceled;
 
 - (id)_initWithStream:(NSInputStream *)readStream encoding:(NSStringEncoding)e initialData:(NSData *)initial error:(NSError **)anError {
     self = [super init];
     if (self) {
         input = [readStream retain];
+        [self setCsvSource:readStream];
         
         NSStreamStatus status = [input streamStatus];
         if (status != NSStreamStatusOpening &&
@@ -143,21 +143,25 @@ NSStringEncoding CHCSVOpenStreamAndSniffEncoding(NSInputStream *stream, uint8_t 
     
     self = [self initWithStream:readStream usedEncoding:usedEncoding error:anError];
 	if (self) {
-		csvFile = [aCSVFile copy];
+        [self setCsvSource:[[aCSVFile copy] autorelease]];
 	}
 	return self;
 }
 
 - (id) initWithCSVString:(NSString *)csvString encoding:(NSStringEncoding)e error:(NSError **)anError {
-    return [self initWithStream:[NSInputStream inputStreamWithData:[csvString dataUsingEncoding:encoding]]
+    self = [self initWithStream:[NSInputStream inputStreamWithData:[csvString dataUsingEncoding:encoding]]
                        encoding:e
                           error:anError];
+    if (self) {
+        [self setCsvSource:[[csvString copy] autorelease]];
+    }
+    return self;
 }
 
 - (void)dealloc {
     [currentString release];
     [currentChunk release];
-    [csvFile release];
+    [csvSource release];
     [input close];
     [input release];
     [delimiter release];
@@ -254,6 +258,28 @@ NSStringEncoding CHCSVOpenStreamAndSniffEncoding(NSInputStream *stream, uint8_t 
 	}
 }
 
+- (void)setNewlineCharacterSet:(NSCharacterSet *)newSet {
+    if ([self hasStarted]) {
+        [NSException raise:NSInvalidArgumentException format:@"You cannot set the newline character set after parsing has started"];
+        return;
+    }
+    
+    BOOL shouldThrow = (newSet == nil);
+    shouldThrow |= [newSet characterIsMember:'#'];
+    shouldThrow |= [newSet characterIsMember:'"'];
+    shouldThrow |= [newSet characterIsMember:'\\'];
+    
+    if (shouldThrow) {
+        [NSException raise:NSInvalidArgumentException format:@"character set is nil or contains invalid characters"];
+        return;
+    }
+    
+    if (newSet != newlineCharacterSet) {
+        [newlineCharacterSet release];
+        newlineCharacterSet = [newSet copy];
+    }
+}
+
 #pragma mark -
 
 - (void)parse {
@@ -267,7 +293,7 @@ NSStringEncoding CHCSVOpenStreamAndSniffEncoding(NSInputStream *stream, uint8_t 
 
 - (void)_beginDocument {
     if ([[self parserDelegate] respondsToSelector:@selector(parser:didStartDocument:)]) {
-        [[self parserDelegate] parser:self didStartDocument:[self csvFile]];
+        [[self parserDelegate] parser:self didStartDocument:[self csvSource]];
     }
 }
 
@@ -278,7 +304,7 @@ NSStringEncoding CHCSVOpenStreamAndSniffEncoding(NSInputStream *stream, uint8_t 
         }
     } else {
         if ([[self parserDelegate] respondsToSelector:@selector(parser:didEndDocument:)]) {
-            [[self parserDelegate] parser:self didEndDocument:[self csvFile]];
+            [[self parserDelegate] parser:self didEndDocument:[self csvSource]];
         }
     }
 }
