@@ -11,22 +11,7 @@
 #import "CHCSVParser.h"
 
 @interface CHCSVParser_Fast : CHCSVParser {
-    NSInputStream *source;
-    
-    NSMutableData *buffer;
-    
-    NSMutableString *string;
-    NSUInteger stringIndex;
-    
-    NSUInteger currentLine;
     unichar delimiter_character;
 }
-
-- (id)initWithStream:(NSInputStream *)readStream encoding:(NSStringEncoding)encoding initialBytes:(uint8_t *)firstFour error:(NSError **)anError;
-
-- (id)initWithCSVFile:(NSString *)file;
-- (id)initWithCSVString:(NSString *)csv;
-
-- (void)parse;
 
 @end

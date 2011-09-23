@@ -27,28 +27,6 @@
 #import "CHCSVParserDelegate.h"
 #import "CHCSVParser.h"
 
-@interface CHCSVParser_Slow : CHCSVParser {
-
-	@private
-	__weak id<CHCSVParserDelegate> parserDelegate;
-    NSInputStream *csvReadStream;
-	BOOL endOfStreamReached;
-	NSStringEncoding fileEncoding;
-	
-	unichar delimiterCharacter;
-	
-	NSMutableString *currentChunkString;
-	NSUInteger stringIndex;
-	
-	BOOL balancedQuotes;
-	BOOL balancedEscapes;
-	
-	NSMutableString *currentField;
-	NSUInteger currentLine;
-	
-	NSUInteger state;
-}
-
-- (id)initWithStream:(NSInputStream *)readStream encoding:(NSStringEncoding)encoding initialBytes:(uint8_t *)firstFour error:(NSError **)anError;
+@interface CHCSVParser_Slow : CHCSVParser
 
 @end

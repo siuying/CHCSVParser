@@ -62,259 +62,173 @@
 
 @interface CHCSVParser_Slow ()
 
-- (void) readNextChunk;
-- (NSString *) nextCharacter;
-- (void) runParseLoop;
-- (void) processComposedCharacter:(NSString *)currentCharacter previousCharacter:(NSString *)previousCharacter previousPreviousCharacter:(NSString *)previousPreviousCharacter;
-
-- (void) beginCurrentLine;
-- (void) beginCurrentField;
-- (void) finishCurrentField;
-- (void) finishCurrentLine;
-
 @end
 
 #define SETSTATE(_s) if (state != CHCSVParserStateCancelled) { state = _s; }
 
 @implementation CHCSVParser_Slow
 
-- (id)initWithStream:(NSInputStream *)readStream encoding:(NSStringEncoding)e initialBytes:(uint8_t *)firstFour error:(NSError **)anError {
-    self = [super _initWithStream:readStream encoding:e initialBytes:firstFour error:anError];
-    if (self) {        
-		balancedQuotes = YES;
-		balancedEscapes = YES;
-		
-		currentLine = 0;
-		currentField = [[NSMutableString alloc] init];
-		
-        if (currentChunk == nil) {
-            currentChunk = [[NSMutableData alloc] init];
-        }
-		endOfStreamReached = NO;
-        currentChunkString = [[NSMutableString alloc] init];
-		stringIndex = 0;
-		
-        SETSTATE(CHCSVParserStateInsideFile)
-        
-    }
-    return self;
-}
-
-- (void) dealloc {
-	[currentField release];
-	[currentChunk release];
-	[currentChunkString release];
-	[error release];
-	[delimiter release];
-	
-	[super dealloc];
-}
-
 #pragma mark Parsing methods
 
-- (NSString *) nextCharacter {
-	if (endOfStreamReached == NO && stringIndex >= [currentChunkString length]/2) {
+- (NSRange)_rangeOfNextCharacter {
+    if (stringIndex >= [currentString length] / 2) {
         [self readNextChunk];
-	}
-	
-	if (stringIndex >= [currentChunkString length]) { return nil; }
-	if ([currentChunkString length] == 0) { return nil; }
-	
-	NSRange charRange = [currentChunkString rangeOfComposedCharacterSequenceAtIndex:stringIndex];
-	NSString *nextChar = [currentChunkString substringWithRange:charRange];
-	stringIndex = charRange.location + charRange.length;
-	return nextChar;
+    }
+    
+    if (stringIndex >= [currentString length]) { return NSMakeRange(NSNotFound, 0); }
+    
+    return [currentString rangeOfComposedCharacterSequenceAtIndex:stringIndex];
 }
 
-- (void) parse {
-	hasStarted = YES;
-	[[self parserDelegate] parser:self didStartDocument:[self csvFile]];
-	
-	[self runParseLoop];
-	
-	if (error != nil) {
-		[[self parserDelegate] parser:self didFailWithError:error];
-	} else {
-		[[self parserDelegate] parser:self didEndDocument:[self csvFile]];
-	}
-	hasStarted = NO;
+- (NSString *)_nextCharacter {
+    NSRange r = [self _rangeOfNextCharacter];
+    if (r.location == NSNotFound) { return nil; }
+    
+    NSString *next = [currentString substringWithRange:r];
+    stringIndex = r.location + r.length;
+    
+    return next;
 }
 
-- (void) runParseLoop {
-	NSString *currentCharacter = nil;
-	NSString *previousCharacter = nil;
-	NSString *previousPreviousCharacter = nil;
-	
-	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
-	unsigned char counter = 0;
-	
-	while (error == nil && 
-		   (currentCharacter = [self nextCharacter]) && 
-		   currentCharacter != nil) {
-		[self processComposedCharacter:currentCharacter previousCharacter:previousCharacter previousPreviousCharacter:previousPreviousCharacter];
+- (NSString *)_peekNextCharacter {
+    NSRange r = [self _rangeOfNextCharacter];
+    if (r.location == NSNotFound) { return nil; }
+    
+    return [currentString substringWithRange:r];
+}
+
+- (void)_parseLines {
+    NSString *peek = [self _peekNextCharacter];
+    while (peek != nil) {
+        NSAutoreleasePool *p = [[NSAutoreleasePool alloc] init];
         
-        if (state == CHCSVParserStateCancelled) { break; }
+        [self _beginLine];
+        [self _parseFields];
+        [self _endLine];
         
-		previousPreviousCharacter = previousCharacter;
-		previousCharacter = currentCharacter;
-		
-		counter++;
-		if (counter == 0) { //this happens every 256 (2**8) iterations when the unsigned short overflows
-			[currentCharacter retain];
-			[previousCharacter retain];
-			[previousPreviousCharacter retain];
-			
-			[pool drain];
-			pool = [[NSAutoreleasePool alloc] init];
-			
-			[currentCharacter autorelease];
-			[previousCharacter autorelease];
-			[previousPreviousCharacter autorelease];
-		}
-	}
-	
-	[pool drain];
-	
-	if ([currentField length] > 0 && state == CHCSVParserStateInsideField) {
-		[self finishCurrentField];
-	}
-	if (state == CHCSVParserStateInsideLine) {
-		[self finishCurrentLine];
-	}
+        [p drain];
+        
+        peek = [self _peekNextCharacter];
+    }
 }
 
-- (void) processComposedCharacter:(NSString *)currentCharacter previousCharacter:(NSString *)previousCharacter previousPreviousCharacter:(NSString *)previousPreviousCharacter {
-	if (state == CHCSVParserStateInsideFile) {
-		//this is the "beginning of the line" state
-		//this is also where we determine if we should ignore this line (it's a comment)
-		if ([currentCharacter isEqual:@"#"] == NO) {
-			[self beginCurrentLine];
-		} else {
-            SETSTATE(CHCSVParserStateInsideComment)
-		}
-	}
-	
-	unichar currentUnichar = [currentCharacter characterAtIndex:0];
-	unichar previousUnichar = [previousCharacter characterAtIndex:0];
-	unichar previousPreviousUnichar = [previousPreviousCharacter characterAtIndex:0];
-	
-	if (currentUnichar == UNICHAR_QUOTE) {
-		if (state == CHCSVParserStateInsideLine) {
-			//beginning a quoted field
-			[self beginCurrentField];
-			balancedQuotes = NO;
-		} else if (state == CHCSVParserStateInsideField) {
-			if (balancedEscapes == NO) {
-				balancedEscapes = YES;
-			} else {
-				balancedQuotes = !balancedQuotes;
-			}
-		}
-	} else if (currentUnichar == delimiterCharacter) {
-		if (state == CHCSVParserStateInsideLine) {
-			[self beginCurrentField];
-			[self finishCurrentField];
-		} else if (state == CHCSVParserStateInsideField) {
-			if (balancedEscapes == NO) {
-				balancedEscapes = YES;
-			} else if (balancedQuotes == YES) {
-				[self finishCurrentField];
-			}
-		}
-	} else if (currentUnichar == UNICHAR_BACKSLASH) {
-		if (state == CHCSVParserStateInsideField) {
-			balancedEscapes = !balancedEscapes;
-		} else if (state == CHCSVParserStateInsideLine) {
-			[self beginCurrentField];
-			balancedEscapes = NO;
-		}
-	} else if ([[NSCharacterSet newlineCharacterSet] characterIsMember:currentUnichar] && [[NSCharacterSet newlineCharacterSet] characterIsMember:previousUnichar] == NO) {
-		if (balancedQuotes == YES && balancedEscapes == YES) {
-			if (state != CHCSVParserStateInsideComment) {
-				[self finishCurrentField];
-				[self finishCurrentLine];
-			} else {
-                SETSTATE(CHCSVParserStateInsideFile)
-			}
-		}
-	} else {
-		if (previousUnichar == UNICHAR_QUOTE && previousPreviousUnichar != UNICHAR_BACKSLASH && balancedQuotes == YES && balancedEscapes == YES) {
-			NSString *reason = [NSString stringWithFormat:@"Invalid CSV format on line #%lu immediately after \"%@\"", currentLine, currentField];
-			error = [[NSError alloc] initWithDomain:CHCSVErrorDomain code:CHCSVErrorCodeInvalidFormat userInfo:[NSDictionary dictionaryWithObject:reason forKey:NSLocalizedDescriptionKey]];
-			return;
-		}
-		if (state != CHCSVParserStateInsideComment) {
-			if (state != CHCSVParserStateInsideField) {
-				[self beginCurrentField];
-			}
-            SETSTATE(CHCSVParserStateInsideField)
-			if (balancedEscapes == NO) {
-				balancedEscapes = YES;
-			}
-		}
-	}
-	
-	if (state != CHCSVParserStateInsideComment) {
-		[currentField appendString:currentCharacter];
-	}
+#define IS_NEWLINE_CHAR(_s) ([[self newlineCharacterSet] characterIsMember:[(_s) characterAtIndex:0]])
+
+- (void)_parseFields {
+    NSString *next = [self _peekNextCharacter];
+    
+    while (!IS_NEWLINE_CHAR(next) && next != nil) {
+        if ([next isEqualToString:@"#"]) {
+            [self _parseComment];
+        } else {
+            [self _parseField];
+        }
+        // this consumes the delimiter/newline
+        next = [self _nextCharacter];
+    }
+
 }
 
-- (void) beginCurrentLine {
-	currentLine++;
-	[[self parserDelegate] parser:self didStartLine:currentLine];
-    SETSTATE(CHCSVParserStateInsideLine)
+- (void)_parseField {
+    NSString *current = [self _peekNextCharacter];
+    NSInteger startIndex = stringIndex;
+    
+    BOOL balancedQuotes = YES;
+    BOOL balancedEscapes = YES;
+    
+    if ([current isEqualToString:@"\""]) {
+        balancedQuotes = NO;
+        (void)[self _nextCharacter]; // skip the quote
+        current = [self _peekNextCharacter];
+    }
+    
+    while (current != nil) {
+        if (balancedQuotes == YES && balancedEscapes == YES) {
+            if ([current isEqualToString:[self delimiter]]) { break; }
+            if (IS_NEWLINE_CHAR(current)) { break; }
+        }
+        
+        current = [self _nextCharacter];
+        
+        if ([current isEqualToString:@"\""]) {
+            if (!balancedEscapes) {
+                balancedEscapes = YES;
+            } else {
+                balancedQuotes = !balancedQuotes;
+            }
+        } else if ([current isEqualToString:@"\\"]) {
+            balancedEscapes = !balancedEscapes;
+        } else {
+            balancedEscapes = YES;
+        }
+        
+        current = [self _peekNextCharacter];
+    }
+    
+    NSUInteger endIndex = stringIndex;
+    NSRange fieldRange = NSMakeRange(startIndex, endIndex - startIndex);
+    NSString *field = [currentString substringWithRange:fieldRange];
+    [self _readField:field];
 }
 
-- (void) beginCurrentField {
-	[currentField setString:@""];
-	balancedQuotes = YES;
-	balancedEscapes = YES;
-    SETSTATE(CHCSVParserStateInsideField)
+- (void)_parseComment {
+    NSUInteger startIndex = stringIndex;
+    NSString *current = nil;
+    
+    // read up to the end of the line/file
+    while ((current = [self _peekNextCharacter]) && current != nil && !IS_NEWLINE_CHAR(current)) {
+        (void)[self _nextCharacter];
+    }
+    
+    NSUInteger endIndex = stringIndex;
+    NSRange commentRange = NSMakeRange(startIndex, endIndex - startIndex);
+    NSString *comment = [currentString substringWithRange:commentRange];
+    [self _readComment:comment];
 }
 
-- (void) finishCurrentField {
-	[currentField trimCharactersInSet_csv:[NSCharacterSet newlineCharacterSet]];
-	if ([currentField hasPrefix:STRING_QUOTE] && [currentField hasSuffix:STRING_QUOTE]) {
-		[currentField trimString_csv:STRING_QUOTE];
-	}
-	if ([currentField hasPrefix:delimiter]) {
-		[currentField replaceCharactersInRange:NSMakeRange(0, [delimiter length]) withString:@""];
-	}
-	
-	[currentField trimCharactersInSet_csv:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
-
-	[currentField replaceOccurrencesOfString:@"\"\"" withString_csv:STRING_QUOTE];
-	
-	//replace all occurrences of regex: \\(.) with $1 (but not by using a regex)
-	NSRange nextSlash = [currentField rangeOfString:STRING_BACKSLASH options:NSLiteralSearch range:NSMakeRange(0, [currentField length])];
-	while(nextSlash.location != NSNotFound) {
-		[currentField replaceCharactersInRange:nextSlash withString:@""];
-		
-		NSRange nextSearchRange = NSMakeRange(nextSlash.location + nextSlash.length, 0);
-		nextSearchRange.length = [currentField length] - nextSearchRange.location;
-        if (nextSearchRange.location >= [currentField length]) { break; }
-		nextSlash = [currentField rangeOfString:STRING_BACKSLASH options:NSLiteralSearch range:nextSearchRange];
-	}
-	
-	NSString *field = [currentField copy];
-	[[self parserDelegate] parser:self didReadField:field];
-	[field release];
-	
-	[currentField setString:@""];
-	
-    SETSTATE(CHCSVParserStateInsideLine)
-}
-
-- (void) finishCurrentLine {
-	[[self parserDelegate] parser:self didEndLine:currentLine];
-    SETSTATE(CHCSVParserStateInsideFile)
-}
-
-#pragma Cancelling
-
-- (void) cancelParsing {
-    SETSTATE(CHCSVParserStateCancelled)
-    error = [[NSError alloc] initWithDomain:CHCSVErrorDomain code:CHCSVErrorCodeParsingCancelled userInfo:nil];
+- (NSString *)_fieldByCleaningField:(NSString *)rawField {
+    NSUInteger length = [rawField length];
+    NSMutableString *field = [[NSMutableString alloc] initWithCapacity:length];
+    NSUInteger index = 0;
+    
+    BOOL skippedLastTime = NO;
+    
+    while (index < length) {
+        NSRange r = [rawField rangeOfComposedCharacterSequenceAtIndex:index];
+        NSString *character = [rawField substringWithRange:r];
+        
+        BOOL shouldAppend = YES;
+        
+        if ([character isEqualToString:@"\""]) {
+            if (index == 0 || (r.location + r.length >= length)) {
+                shouldAppend = NO;
+                // this is the first/last character; skip it
+            } else if (r.location + r.length < length) {
+                NSRange nextRange = [rawField rangeOfComposedCharacterSequenceAtIndex:r.location + r.length];
+                NSString *next = [rawField substringWithRange:nextRange];
+                if ([next isEqualToString:character]) {
+                    // quote escaped by double-quoting
+                    // skip this one
+                    shouldAppend = NO;
+                }
+            }
+        } else if ([character isEqualToString:@"\\"]) {
+            if (r.location + r.length < length) {
+                shouldAppend = NO;
+            }
+        }
+        
+        if (shouldAppend || skippedLastTime == YES) {
+            [field appendString:character];
+            skippedLastTime = NO;
+        } else {
+            skippedLastTime = YES;
+        }
+        
+        index = r.location + r.length;
+    }
+    
+    return [field autorelease];
 }
 
 @end

@@ -14,6 +14,7 @@
 		551BB9DB141D20E600A1D679 /* CHCSVParser_Fast.m in Sources */ = {isa = PBXBuildFile; fileRef = 551BB9D9141D20E600A1D679 /* CHCSVParser_Fast.m */; };
 		551BB9DE141D2A8F00A1D679 /* CHCSVTypes.m in Sources */ = {isa = PBXBuildFile; fileRef = 551BB9DD141D2A8F00A1D679 /* CHCSVTypes.m */; };
 		551BB9DF141D2A8F00A1D679 /* CHCSVTypes.m in Sources */ = {isa = PBXBuildFile; fileRef = 551BB9DD141D2A8F00A1D679 /* CHCSVTypes.m */; };
+		55220A0F142C2E0500840F81 /* Test-UTF16LE.csv in Resources */ = {isa = PBXBuildFile; fileRef = 55220A0E142C2E0500840F81 /* Test-UTF16LE.csv */; };
 		5538B52D1344F0A1004930DD /* test.tsv in Resources */ = {isa = PBXBuildFile; fileRef = 5538B52C1344F0A1004930DD /* test.tsv */; };
 		557FCEB61203F938009FCDBA /* CoreServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 557FCEB51203F938009FCDBA /* CoreServices.framework */; };
 		557FD0431204A45D009FCDBA /* NSArray+CHCSVAdditions.m in Sources */ = {isa = PBXBuildFile; fileRef = 557FD0421204A45D009FCDBA /* NSArray+CHCSVAdditions.m */; };
@@ -58,6 +59,7 @@
 		551BB9DC141D2A8F00A1D679 /* CHCSVTypes.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CHCSVTypes.h; sourceTree = "<group>"; };
 		551BB9DD141D2A8F00A1D679 /* CHCSVTypes.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CHCSVTypes.m; sourceTree = "<group>"; };
 		551BB9E0141D9A7200A1D679 /* CHCSVParserDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CHCSVParserDelegate.h; sourceTree = "<group>"; };
+		55220A0E142C2E0500840F81 /* Test-UTF16LE.csv */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = "Test-UTF16LE.csv"; sourceTree = "<group>"; };
 		5538B52C1344F0A1004930DD /* test.tsv */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = test.tsv; sourceTree = "<group>"; };
 		557FCEB51203F938009FCDBA /* CoreServices.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreServices.framework; path = System/Library/Frameworks/CoreServices.framework; sourceTree = SDKROOT; };
 		557FD0411204A45D009FCDBA /* NSArray+CHCSVAdditions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSArray+CHCSVAdditions.h"; sourceTree = "<group>"; };
@@ -115,6 +117,7 @@
 				08FB7796FE84155DC02AAC07 /* main.m */,
 				5516BCBA12578DA90025F235 /* CHCSVParser */,
 				551981EE1203800300FBE033 /* Test.csv */,
+				55220A0E142C2E0500840F81 /* Test-UTF16LE.csv */,
 				5538B52C1344F0A1004930DD /* test.tsv */,
 				557FD05A1204A72B009FCDBA /* UnitTests.h */,
 				557FD05B1204A72B009FCDBA /* UnitTests.m */,
@@ -253,6 +256,7 @@
 			files = (
 				557FD05E1204A736009FCDBA /* Test.csv in Resources */,
 				5538B52D1344F0A1004930DD /* test.tsv in Resources */,
+				55220A0F142C2E0500840F81 /* Test-UTF16LE.csv in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

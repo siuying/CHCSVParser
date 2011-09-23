@@ -10,6 +10,7 @@
 #import "CHCSVParserDelegate.h"
 
 @interface CHCSVParser : NSObject {
+    @protected
     BOOL hasStarted;
     NSInputStream *input;
     NSString *csvFile;
@@ -18,8 +19,12 @@
     NSError *error;
     NSStringEncoding encoding;
     BOOL canceled;
+    NSUInteger chunkSize;
     NSMutableData *currentChunk;
     NSMutableString *currentString;
+    NSUInteger currentLine;
+    NSUInteger stringIndex;
+    __weak id<CHCSVParserDelegate> parserDelegate;
 }
 
 @property (assign) __weak id<CHCSVParserDelegate> parserDelegate;

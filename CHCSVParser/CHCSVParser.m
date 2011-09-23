@@ -61,12 +61,17 @@ NSStringEncoding CHCSVOpenStreamAndSniffEncoding(NSInputStream *stream, uint8_t 
 @end
 
 @implementation CHCSVParser
-@synthesize parserDelegate, error, csvFile, delimiter, chunkSize;
+@synthesize hasStarted;
+@synthesize parserDelegate;
+@synthesize error;
+@synthesize csvFile;
+@synthesize delimiter;
+@synthesize chunkSize;
 @synthesize newlineCharacterSet;
 @synthesize encoding;
 @synthesize canceled;
 
-- (id)_initWithStream:(NSInputStream *)readStream encoding:(NSStringEncoding)encoding initialBytes:(uint8_t *)firstFour error:(NSError **)anError {
+- (id)_initWithStream:(NSInputStream *)readStream encoding:(NSStringEncoding)e initialData:(NSData *)initial error:(NSError **)anError {
     self = [super init];
     if (self) {
         input = [readStream retain];
@@ -82,28 +87,46 @@ NSStringEncoding CHCSVOpenStreamAndSniffEncoding(NSInputStream *stream, uint8_t 
             return nil;
         }
 		
+        [self setHasStarted:NO];
         [self setNewlineCharacterSet:[NSCharacterSet newlineCharacterSet]];
 		[self setDelimiter:@","];
-        [self setChunkSize:2048];
+        [self setChunkSize:8192];
+        currentLine = 0;
+        encoding = e;
+        
+        if ([initial length] > 0) {
+            currentChunk = [[NSMutableData alloc] initWithData:initial];
+        } else {
+            currentChunk = [[NSMutableData alloc] initWithCapacity:[self chunkSize]];
+        }
+        currentString = [[NSMutableString alloc] init];
+        
     }
     return self;
 }
 
 - (id)initWithStream:(NSInputStream *)readStream usedEncoding:(NSStringEncoding *)usedEncoding error:(NSError **)anError {
     NSStringEncoding finalEncoding = 0;
+    NSData *initialData = nil;
+    
     if (usedEncoding && *usedEncoding > 0) {
         finalEncoding = *usedEncoding;
+        
+        [readStream open];
     } else {
         uint8_t bytes[4];
         finalEncoding = CHCSVOpenStreamAndSniffEncoding(readStream, bytes);
         [self release];
         
-        if (finalEncoding == NSUTF8StringEncoding || finalEncoding == NSMacOSRomanStringEncoding) {
-            self = [[CHCSVParser_Fast alloc] initWithStream:readStream encoding:finalEncoding initialBytes:bytes error:anError];
-        } else {
-            self = [[CHCSVParser_Slow alloc] initWithStream:readStream encoding:finalEncoding initialBytes:bytes error:anError];
-        }
+        initialData = [NSData dataWithBytes:bytes length:4];
     }
+    
+    if (finalEncoding == NSUTF8StringEncoding || finalEncoding == NSMacOSRomanStringEncoding) {
+        self = [[CHCSVParser_Fast alloc] _initWithStream:readStream encoding:finalEncoding initialData:initialData error:anError];
+    } else {
+        self = [[CHCSVParser_Slow alloc] _initWithStream:readStream encoding:finalEncoding initialData:initialData error:anError];
+    }
+    
     return self;
 }
 
@@ -132,16 +155,15 @@ NSStringEncoding CHCSVOpenStreamAndSniffEncoding(NSInputStream *stream, uint8_t 
 }
 
 - (void)dealloc {
+    [currentString release];
+    [currentChunk release];
     [csvFile release];
+    [input close];
     [input release];
     [delimiter release];
     [error release];
     
     [super dealloc];
-}
-
-- (void)parse {
-    NSAssert(NO, @"%s must be overridden", __PRETTY_FUNCTION__);
 }
 
 - (void)cancelParsing {
@@ -207,7 +229,7 @@ NSStringEncoding CHCSVOpenStreamAndSniffEncoding(NSInputStream *stream, uint8_t 
 }
 
 - (void) setDelimiter:(NSString *)newDelimiter {
-	if (hasStarted) {
+	if ([self hasStarted]) {
 		[NSException raise:NSInvalidArgumentException format:@"You cannot set a delimiter after parsing has started"];
 		return;
 	}
@@ -230,6 +252,72 @@ NSStringEncoding CHCSVOpenStreamAndSniffEncoding(NSInputStream *stream, uint8_t 
 		[delimiter release];
 		delimiter = [newDelimiter copy];
 	}
+}
+
+#pragma mark -
+
+- (void)parse {
+    [self setHasStarted:YES];
+    [self _beginDocument];
+    
+    [self _parseLines];
+    
+    [self _endDocument];
+}
+
+- (void)_beginDocument {
+    if ([[self parserDelegate] respondsToSelector:@selector(parser:didStartDocument:)]) {
+        [[self parserDelegate] parser:self didStartDocument:[self csvFile]];
+    }
+}
+
+- (void)_endDocument {
+    if ([self error] != nil) {
+        if ([[self parserDelegate] respondsToSelector:@selector(parser:didFailWithError:)]) {
+            [[self parserDelegate] parser:self didFailWithError:[self error]];
+        }
+    } else {
+        if ([[self parserDelegate] respondsToSelector:@selector(parser:didEndDocument:)]) {
+            [[self parserDelegate] parser:self didEndDocument:[self csvFile]];
+        }
+    }
+}
+
+- (void)_beginLine {
+    currentLine++;
+    if ([[self parserDelegate] respondsToSelector:@selector(parser:didStartLine:)]) {
+        [[self parserDelegate] parser:self didStartLine:currentLine];
+    }
+}
+
+- (void)_endLine {
+    if ([[self parserDelegate] respondsToSelector:@selector(parser:didEndLine:)]) {
+        [[self parserDelegate] parser:self didEndLine:currentLine];
+    }
+    
+    [currentString replaceCharactersInRange:NSMakeRange(0, stringIndex) withString:@""];
+    stringIndex = 0;
+}
+
+
+- (void)_parseLines { }
+- (void)_parseFields { }
+- (void)_parseField { }
+- (void)_parseComment { }
+
+- (NSString *)_fieldByCleaningField:(NSString *)rawField { return rawField; }
+
+- (void)_readField:(NSString *)field {
+    if ([[self parserDelegate] respondsToSelector:@selector(parser:didReadField:)]) {
+        field = [self _fieldByCleaningField:field];
+        [[self parserDelegate] parser:self didReadField:field];
+    }
+}
+
+- (void)_readComment:(NSString *)comment {
+    if ([[self parserDelegate] respondsToSelector:@selector(parser:didReadComment:)]) {
+        [[self parserDelegate] parser:self didReadComment:comment];
+    }
 }
 
 @end
