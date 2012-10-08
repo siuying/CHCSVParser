@@ -9,6 +9,6 @@ Pod::Spec.new do |spec|
     spec.license      = 'MIT (LICENSE)'
     spec.version      = '1.0.2'
     #original source: https://github.com/davedelong/CHCSVParser
-    spec.source       = { :git => 'https://github.com/nicktmro/CHCSVParser.git', :tag => '1.0.2' }
+    spec.source       = { :git => 'https://github.com/siuying/CHCSVParser.git', :commit => '00bc468' }
     spec.source_files = 'CHCSVParser/**/*.{h,m}'
 end
