@@ -9,4 +9,5 @@ Pod::Spec.new do |s|
   s.source       = { :git => 'https://github.com/siuying/CHCSVParser.git', :commit => '00bc468' }
   s.source_files = 'CHCSVParser/**/*.{h,m}'
   s.requires_arc = true
+  s.ios.deployment_target = '5.0'
 end
